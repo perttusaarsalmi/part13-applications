@@ -1,0 +1,11 @@
+POST http://localhost:3002/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBlcnR0dVMiLCJpZCI6IjY4YzAyMjAyZWFkMmU0Mzg0MGVmYzc0ZiIsImlhdCI6MTc1NzQ4NzM3MH0.70h6rTBNxWKh_oJpWALBaUBrR6I5YrJG4I-dU0u5uoY
+
+{
+    "title": "Pertun blogi 2",
+    "author": "Perttu Saarsalmi",
+    "url": "höpöhöpö2.org",
+    "likes": 1001,
+    "userId": "68c02202ead2e43840efc74f"
+}
