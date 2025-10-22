@@ -1,93 +1,85 @@
-const blogsRouter = require('express').Router()
-const Blog = require('../models/blog')
-const { tokenExtractor, userExtractor } = require('../utils/middleware')
-
+const blogsRouter = require('express').Router();
+const { Blog, User } = require('../models');
+const { tokenExtractor, userExtractor } = require('../utils/middleware');
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({}).populate('user', {
-    name: 1,
-    username: 1,
-  })
-  response.json(blogs)
-})
+  const blogs = await Blog.findAll({
+    include: {
+      model: User,
+      attributes: ['name', 'username'],
+    },
+  });
+  response.json(blogs);
+});
 
 blogsRouter.post(
   '/',
   tokenExtractor,
   userExtractor,
   async (request, response) => {
-    const body = request.body
-    const user = request.user
+    const body = request.body;
+    const user = request.user;
 
     if (!body.title || !body.url) {
-      return response.status(400).json({ error: 'Title and URL are required' })
+      return response.status(400).json({ error: 'Title and URL are required' });
     }
 
-    const blog = new Blog({
+    const savedBlog = await Blog.create({
       title: body.title,
       author: body.author,
       url: body.url,
       likes: body.likes || 0,
-      user: user._id,
-    })
+      userId: user.id,
+    });
 
-    const savedBlog = await blog.save()
-    user.blogs = user.blogs.concat(savedBlog._id)
-    await user.save()
-    response.status(201).json(savedBlog)
+    response.status(201).json(savedBlog);
   }
-)
+);
 
 blogsRouter.delete(
   '/:id',
   tokenExtractor,
   userExtractor,
   async (request, response) => {
-    const user = request.user
-    const blog = await Blog.findById(request.params.id)
+    const user = request.user;
+    const blog = await Blog.findByPk(request.params.id);
 
     if (!blog) {
-      return response.status(404).json({ error: 'blog not found' })
+      return response.status(404).json({ error: 'blog not found' });
     }
 
-    if (blog.user.toString() !== user._id.toString()) {
+    if (blog.userId !== user.id) {
       return response
         .status(401)
-        .json({ error: 'blog does not belong to user' })
+        .json({ error: 'blog does not belong to user' });
     }
 
-    await Blog.findByIdAndDelete(request.params.id)
-    response.status(204).end()
+    await blog.destroy();
+    response.status(204).end();
   }
-)
+);
 
-blogsRouter.put('/:id', (request, response, next) => {
-  const body = request.body
+blogsRouter.put('/:id', async (request, response) => {
+  const body = request.body;
 
   if (!body.title || !body.url) {
-    return response.status(400).json({ error: 'Title and URL are required' })
+    return response.status(400).json({ error: 'Title and URL are required' });
   }
 
-  const update = {
+  const blog = await Blog.findByPk(request.params.id);
+
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' });
+  }
+
+  const updatedBlog = await blog.update({
     title: body.title,
     url: body.url,
     author: body.author,
     likes: body.likes,
-  }
+  });
 
-  Blog.findByIdAndUpdate(request.params.id, update, {
-    new: true,
-    runValidators: true,
-    context: 'query',
-  })
-    .then((updatedBlog) => {
-      if (updatedBlog) {
-        response.json(updatedBlog)
-      } else {
-        response.status(404).json({ error: 'blog not found' })
-      }
-    })
-    .catch((error) => next(error))
-})
+  response.json(updatedBlog);
+});
 
-module.exports = blogsRouter
+module.exports = blogsRouter;
