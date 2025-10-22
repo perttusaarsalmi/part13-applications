@@ -36,22 +36,30 @@ blogsRouter.post(
   tokenExtractor,
   userExtractor,
   async (request, response) => {
-    const body = request.body;
-    const user = request.user;
+    try {
+      const body = request.body;
+      const user = request.user;
 
-    if (!body.title || !body.url) {
-      return response.status(400).json({ error: 'Title and URL are required' });
+      if (!body.title || !body.url) {
+        return response
+          .status(400)
+          .json({ error: 'Title and URL are required' });
+      }
+
+      const savedBlog = await Blog.create({
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes || 0,
+        year: body.year,
+        userId: user.id,
+      });
+
+      response.status(201).json(savedBlog);
+    } catch (error) {
+      console.error('Error creating blog:', error);
+      response.status(500).json({ error: error.message });
     }
-
-    const savedBlog = await Blog.create({
-      title: body.title,
-      author: body.author,
-      url: body.url,
-      likes: body.likes || 0,
-      userId: user.id,
-    });
-
-    response.status(201).json(savedBlog);
   }
 );
 
@@ -96,6 +104,7 @@ blogsRouter.put('/:id', async (request, response) => {
     url: body.url,
     author: body.author,
     likes: body.likes,
+    year: body.year,
   });
 
   response.json(updatedBlog);

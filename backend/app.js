@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const logger = require('./utils/logger');
 const middleware = require('./utils/middleware');
 const blogsRouter = require('./controllers/blogs');
 const usersRouter = require('./controllers/users');
