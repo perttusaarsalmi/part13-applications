@@ -26,6 +26,7 @@ blogsRouter.get('/', async (request, response) => {
       attributes: ['name', 'username'],
     },
     where,
+    order: [['likes', 'DESC']],
   });
   response.json(blogs);
 });
