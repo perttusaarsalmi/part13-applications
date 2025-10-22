@@ -13,9 +13,7 @@
 -- );
 
 -- Insert sample blogs
-INSERT INTO blogs (author, url, title, likes) VALUES 
-('Dan Abramov', 'https://overreacted.io/on-let-vs-const/', 'On let vs const', 0),
-('Laurenz Albe', 'https://www.cybertec-postgresql.com/en/gaps-in-sequences-postgresql/', 'Gaps in sequences in PostgreSQL', 0);
+--  docker exec -it phonebook-postgres psql -U postgres -d phonebook -c "INSERT INTO blogs (author, url, title, likes) VALUES ('Dan Abramov', 'https://overreacted.io/on-let-vs-const/', 'On let vs const', 0), ('Laurenz Albe', 'https://www.cybertec-postgresql.com/en/gaps-in-sequences-postgresql/', 'Gaps in sequences in PostgreSQL', 0);"
 
 -- Query to verify the data
-SELECT * FROM blogs;
+-- docker exec -it phonebook-postgres psql -U postgres -d phonebook -c "SELECT * FROM blogs;"

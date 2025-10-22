@@ -37,4 +37,41 @@ usersRouter.post('/', async (request, response, next) => {
   }
 });
 
+usersRouter.put('/:username', async (request, response, next) => {
+  const { username: currentUsername } = request.params;
+  const { username: newUsername } = request.body;
+
+  if (!newUsername) {
+    return response.status(400).json({
+      error: 'New username is required',
+    });
+  }
+
+  if (newUsername.length < 3) {
+    return response.status(400).json({
+      error: 'Username should be at least three characters long',
+    });
+  }
+
+  try {
+    const user = await User.findOne({
+      where: { username: currentUsername },
+    });
+
+    if (!user) {
+      return response.status(404).json({
+        error: 'User not found',
+      });
+    }
+
+    const updatedUser = await user.update({
+      username: newUsername,
+    });
+
+    response.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = usersRouter;
