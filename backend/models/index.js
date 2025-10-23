@@ -1,12 +1,11 @@
 const User = require('./user');
 const Blog = require('./blog');
 const ReadingList = require('./readingList');
+const Session = require('./session');
 
-// User-Blog relationship (one-to-many: user owns blogs)
 User.hasMany(Blog, { foreignKey: 'userId' });
 Blog.belongsTo(User, { foreignKey: 'userId' });
 
-// Many-to-many relationship through ReadingList (users can add blogs to reading list)
 User.belongsToMany(Blog, {
   through: ReadingList,
   foreignKey: 'userId',
@@ -20,14 +19,17 @@ Blog.belongsToMany(User, {
   as: 'readingListUsers',
 });
 
-// Direct associations to ReadingList
 User.hasMany(ReadingList, { foreignKey: 'userId' });
 ReadingList.belongsTo(User, { foreignKey: 'userId' });
 Blog.hasMany(ReadingList, { foreignKey: 'blogId' });
 ReadingList.belongsTo(Blog, { foreignKey: 'blogId' });
 
+User.hasMany(Session, { foreignKey: 'userId' });
+Session.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Blog,
   ReadingList,
+  Session,
 };

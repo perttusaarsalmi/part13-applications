@@ -1,0 +1,42 @@
+### Comprehensive logout test
+
+# Step 1: Login to get a token
+POST http://localhost:3003/api/login
+Content-Type: application/json
+
+{
+  "username": "perttu",
+  "password": "secret"
+}
+
+### Copy the token from above response and replace YOUR_TOKEN_HERE below
+
+# Step 2: Test that token works - create a blog (should succeed)
+POST http://localhost:3003/api/blogs
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Test blog before logout",
+  "author": "Test Author", 
+  "url": "http://test.com"
+}
+
+### Step 3: Logout (should succeed and remove session)
+DELETE http://localhost:3003/api/logout
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Step 4: Try to create blog with same token (should FAIL with "session not found")
+POST http://localhost:3003/api/blogs
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Test blog after logout - should fail",
+  "author": "Test Author",
+  "url": "http://test.com"
+}
+
+### Step 5: Try to access reading list with same token (should FAIL)
+GET http://localhost:3003/api/users
+Authorization: Bearer YOUR_TOKEN_HERE
