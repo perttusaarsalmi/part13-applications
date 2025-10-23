@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const usersRouter = require('express').Router();
-const { User, Blog } = require('../models');
+const { User, Blog, ReadingList } = require('../models');
 
 usersRouter.get('/', async (request, response) => {
   const users = await User.findAll({
@@ -10,6 +10,52 @@ usersRouter.get('/', async (request, response) => {
     },
   });
   response.json(users);
+});
+
+usersRouter.get('/:id', async (request, response) => {
+  const { read } = request.query;
+
+  const readingListWhere = {};
+  if (read !== undefined) {
+    readingListWhere.read = read === 'true';
+  }
+
+  const user = await User.findByPk(request.params.id, {
+    attributes: ['name', 'username'],
+    include: [
+      {
+        model: ReadingList,
+        where:
+          Object.keys(readingListWhere).length > 0
+            ? readingListWhere
+            : undefined,
+        include: {
+          model: Blog,
+          attributes: ['id', 'url', 'title', 'author', 'likes', 'year'],
+        },
+      },
+    ],
+  });
+
+  if (!user) {
+    return response.status(404).json({ error: 'User not found' });
+  }
+
+  const formattedUser = {
+    name: user.name,
+    username: user.username,
+    readings: user.readingLists.map((readingList) => ({
+      ...readingList.blog.toJSON(),
+      readinglists: [
+        {
+          read: readingList.read,
+          id: readingList.id,
+        },
+      ],
+    })),
+  };
+
+  response.json(formattedUser);
 });
 
 usersRouter.post('/', async (request, response, next) => {
